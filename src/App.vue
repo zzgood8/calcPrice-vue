@@ -76,17 +76,18 @@ const uploadFailed = (error: Error) => {
     message: '服务器响应失败!请联系管理员!',
     type: 'error'
   })
+  console.log(error)
 }
 
 // 上传成功回调
 const uploadSuccess = (res: any) => {
-  if (res.c == 200) {
-    excelData.value = fortmatPrice(res.d)
+  if (res.code == 200) {
+    excelData.value = fortmatPrice(res.data)
     state.dialogVisible = true
   } else {
     ElNotification({
       title: '上传失败!',
-      message: res.m,
+      message: res.msg,
       type: 'error'
     })
   }

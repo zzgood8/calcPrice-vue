@@ -30,5 +30,6 @@ export function updateOrSave(priceRule: PriceRule) {
 }
 
 export function uploadUrl() {
-  return http.getUri() + '/purchase'
+  // return http.getUri() + '/purchase'
+  return 'http://localhost:9001/purchase'
 }

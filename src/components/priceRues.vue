@@ -24,7 +24,6 @@
     </el-container>
 
     <el-dialog
-      :show-close="false"
       :close-on-click-modal="false"
       :destroy-on-close="true"
       draggable
@@ -34,7 +33,7 @@
     >
       <el-form ref="editForm" :rules="rules" label-suffix=": " :model="editData" label-width="60px">
         <el-form-item label="">
-          <el-alert show-icon :closable="false" title="变量: w=长, d=宽, h=厚" type="warning" />
+          <el-alert show-icon :closable="false" title="变量: W=长, D=宽, H=厚" type="warning" />
         </el-form-item>
 
         <el-form-item prop="category" label="分类">
@@ -80,6 +79,7 @@ const state = reactive({
 const categoryData = ref<any>()
 const editData = ref<any>({})
 const editForm = ref<InstanceType<typeof ElForm>>()
+defineEmits(['initCategory'])
 
 // 通过后台返回所有的分类
 api
@@ -171,7 +171,6 @@ const addOrEditSubmit = () => {
   if (!editForm) return
   editForm.value?.validate((valid) => {
     if (valid) {
-      console.log('123')
       api
         .updateOrSave(editData.value)
         .then(() => {
