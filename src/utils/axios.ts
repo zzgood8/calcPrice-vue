@@ -3,7 +3,10 @@ import { ElNotification } from 'element-plus'
 
 const http = Axios.create({
   baseURL: '/api',
-  timeout: 5000
+  timeout: 5000,
+  headers: {
+    'content-type': 'application/json'
+  }
 })
 
 http.interceptors.response.use(

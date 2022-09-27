@@ -7,7 +7,7 @@
     <el-container>
       <el-aside width="160px">
         <el-scrollbar height="400px">
-          <el-menu @select="selectCategory">
+          <el-menu :default-active="state.menuIndex" @select="selectCategory">
             <el-menu-item v-for="item in state.categorys" :key="item" :index="item">{{ item }}</el-menu-item>
           </el-menu>
         </el-scrollbar>
@@ -18,6 +18,12 @@
           <el-table @row-dblclick="editPriceRule" highlight-current-row border height="376" :data="categoryData" stripe style="width: 100%">
             <el-table-column prop="name" label="名称" />
             <el-table-column prop="formula" label="公式" />
+            <el-table-column prop="formula" label="操作">
+              <template #default="scope">
+                <el-button size="small" @click="editPriceRule(scope.row)">修改</el-button>
+                <el-button size="small" type="danger" @click="deletePriceRule(scope.row)">删除</el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </el-scrollbar>
       </el-main>
@@ -45,7 +51,7 @@
         </el-form-item>
 
         <el-form-item prop="formula" label="公式">
-          <el-input v-model="editData.formula" type="textarea" />
+          <el-input autosize v-model="editData.formula" type="textarea" />
         </el-form-item>
 
         <el-form-item>
@@ -66,30 +72,41 @@
 <script setup lang="ts">
 import { Edit } from '@element-plus/icons-vue'
 import { FormRules, ElForm } from 'element-plus'
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import * as api from '../api/PriceRules'
 import _ from 'lodash'
 
 const state = reactive({
-  dialogVisible: false,
-  editDialogVisible: false,
-  categorys: [],
-  menuIndex: ''
+  dialogVisible: false, // 公式表格开关
+  editDialogVisible: false, // 公式表单编辑开关
+  categorys: [] as any, // 分类数组
+  menuIndex: '' // 当前激活的分组
 })
-const categoryData = ref<any>()
-const editData = ref<any>({})
-const editForm = ref<InstanceType<typeof ElForm>>()
-defineEmits(['initCategory'])
+const categoryData = ref<any>() // 当前分类下的数据
+const editData = ref<any>({}) // 编辑的数据
+const editForm = ref<InstanceType<typeof ElForm>>() // 表单对象
 
 // 通过后台返回所有的分类
-api
-  .getAllCategory()
-  .then((res) => {
-    state.categorys = res as any
-  })
-  .catch((err) => {
-    console.error(err)
-  })
+async function getCategory() {
+  await api
+    .getAllCategory()
+    .then((res) => {
+      state.categorys = res as any
+      if (state.categorys.length > 0 && state.categorys.indexOf(state.menuIndex) === -1) {
+        state.menuIndex = state.categorys[0]
+      }
+      if (state.menuIndex) {
+        selectCategory(state.menuIndex)
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+}
+
+onMounted(() => {
+  getCategory()
+})
 
 // 通过后台获取该分类下明细
 const selectCategory = (index: any) => {
@@ -155,6 +172,18 @@ const editPriceRule = (row: any) => {
   state.editDialogVisible = true
 }
 
+// 删除公式
+const deletePriceRule = (row: any) => {
+  api
+    .deletePriceRules(row.id)
+    .then(async (res) => {
+      await getCategory()
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+}
+
 // 新增公式弹窗
 const addFormla = () => {
   editData.value = {
@@ -173,8 +202,8 @@ const addOrEditSubmit = () => {
     if (valid) {
       api
         .updateOrSave(editData.value)
-        .then(() => {
-          selectCategory(state.menuIndex)
+        .then(async () => {
+          await getCategory()
           state.editDialogVisible = false
         })
         .catch((err) => {

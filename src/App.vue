@@ -86,8 +86,8 @@ const uploadSuccess = (res: any) => {
     state.dialogVisible = true
   } else {
     ElNotification({
-      title: '上传失败!',
-      message: res.msg,
+      title: res.msg,
+      message: res.data,
       type: 'error'
     })
   }

@@ -29,7 +29,14 @@ export function updateOrSave(priceRule: PriceRule) {
   })
 }
 
+export function deletePriceRules(id: number) {
+  return http({
+    url: '/purchase/delete',
+    method: 'post',
+    data: id
+  })
+}
+
 export function uploadUrl() {
-  // return http.getUri() + '/purchase'
-  return 'http://localhost:9001/purchase'
+  return http.getUri() + '/purchase'
 }
